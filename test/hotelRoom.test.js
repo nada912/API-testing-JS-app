@@ -7,7 +7,7 @@ jest.setTimeout(30000); // Set timeout to 30 seconds
 
 // Connect to a test database before running tests
 beforeAll(async () => {
-    const dbURI = "mongodb://localhost:27017/api-db";
+    const dbURI = "mongodb://127.0.0.1:27017/api-db";
     await mongoose.connect(dbURI);
     await HotelRoom.deleteMany();
 });
