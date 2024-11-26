@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const app = require('../index'); // Import the Express app
 const HotelRoom = require('../models/HotelRoom'); // Import the HotelRoom model
 
-jest.setTimeout(30000); // Set timeout to 30 seconds
+jest.setTimeout(60000); // Set timeout to 60 seconds
 
 // Connect to a test database before running tests
 beforeAll(async () => {
