@@ -1,34 +1,35 @@
-name: Docker Build and Push
+name: Docker Image CI
 
 on:
   workflow_run:
     workflows:
-      - Node.js API Test
+      - Node.js API Test 
     types:
-      - completed
+      - completed  
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # Step 1: Checkout the code
+    - uses: actions/checkout@v4
 
-      # Step 2: Log in to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    # Step 2: Log in to Docker Hub
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 3: Build and tag the Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t yourusername/your-app:latest .
+    # Step 3: Build the Docker image
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag js-app-testing:$(date +%s)
 
-      # Step 4: Push the Docker image to Docker Hub
-      - name: Push Docker image
-        run: |
-          docker push yourusername/your-app:latest
+    # Step 4: Tag the Docker image
+    - name: Tag the Docker image
+      run: docker tag js-app-testing:$(date +%s) ${{ secrets.DOCKER_USERNAME }}/js-app-testing:latest
+
+    # Step 5: Push the Docker image to Docker Hub
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/js-app-testing:latest
