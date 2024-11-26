@@ -8,6 +8,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
     strategy:
       matrix:
         node-version: [22.x]
@@ -15,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Cache the Node.js modules
+    # Cache Node.js modules
     - name: Cache Node.js modules
       uses: actions/cache@v3
       with:
@@ -32,4 +43,13 @@ jobs:
         cache: 'npm'
       
     - run: npm install
+    
+    # Wait for MongoDB to be ready before running tests
+    - name: Wait for MongoDB to be ready
+      run: |
+        until mongo --host localhost --eval "print('waiting for connection')" > /dev/null 2>&1; do
+          echo "Waiting for MongoDB to be available..."
+          sleep 3
+        done
+    
     - run: npm test
