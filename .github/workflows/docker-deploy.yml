@@ -28,8 +28,8 @@ jobs:
 
     # Step 4: Tag the Docker image
     - name: Tag the Docker image
-      run: docker tag js-app-testing:$(date +%s) ${{ secrets.DOCKER_USERNAME }}/js-app-testing:latest
+      run: docker tag js-app-testing:$(date +%s) nada912/js-app-testing:latest
 
     # Step 5: Push the Docker image to Docker Hub
     - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/js-app-testing:latest
+      run: docker push nada912/js-app-testing:latest
