@@ -2,7 +2,7 @@ name: Node.js API Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -10,23 +10,24 @@ jobs:
 
     services:
       mongo:
-        image: mongo:latest
+        image: mongo:5.0  # Use a stable version of MongoDB
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongo --eval 'db.adminCommand(\"ping\")'"
+          --health-cmd "mongo --eval 'db.adminCommand({ping: 1})'"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 3
-
-    strategy:
-      matrix:
-        node-version: [22.x]
+          --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    # Cache Node.js modules
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
     - name: Cache Node.js modules
       uses: actions/cache@v3
       with:
@@ -36,20 +37,18 @@ jobs:
           ${{ runner.os }}-node-${{ matrix.node-version }}-build-
           ${{ runner.os }}-node-${{ matrix.node-version }}-
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-      
-    - run: npm install
-    
-    # Wait for MongoDB to be ready before running tests
-    - name: Wait for MongoDB to be ready
+    - name: Install dependencies
+      run: npm install
+
+    - name: Wait for MongoDB to start
       run: |
-        until mongo --host localhost --eval "print('waiting for connection')" > /dev/null 2>&1; do
-          echo "Waiting for MongoDB to be available..."
-          sleep 3
-        done
-    
-    - run: npm test
+        echo "Waiting for MongoDB to be ready"
+        sleep 60  # Give MongoDB more time to start
+
+    - name: Show MongoDB logs
+      run: docker logs mongo  # Print MongoDB logs for debugging
+
+    - name: Run tests
+      env:
+        MONGO_URI: mongodb://mongo:27017/api-db  # Correct MongoDB URI
+      run: npm test
