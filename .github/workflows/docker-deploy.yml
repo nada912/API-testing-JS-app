@@ -3,7 +3,7 @@ name: Docker Build and Push
 on:
   workflow_run:
     workflows:
-      - Node.js API Test 
+      - Node.js API Test
     types:
       - completed
 
