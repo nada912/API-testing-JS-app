@@ -10,14 +10,14 @@ jobs:
 
     services:
       mongo:
-        image: mongo:5.0  # Use a stable version of MongoDB
+        image: mongo:5.0  # Use a stable MongoDB version
         ports:
           - 27017:27017
         options: >-
           --health-cmd "mongo --eval 'db.adminCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 15s  # Increased interval
+          --health-timeout 10s   # Increased timeout
+          --health-retries 6      # More retries
 
     steps:
     - name: Checkout code
@@ -40,15 +40,23 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Wait for MongoDB to start
+    - name: Clean up previous Docker containers
+      run: docker container prune -f
+
+    - name: Wait for MongoDB to be ready
       run: |
         echo "Waiting for MongoDB to be ready"
-        sleep 60  # Give MongoDB more time to start
+        sleep 60  # Longer wait for MongoDB to be ready
+
+    - name: List all Docker containers
+      run: docker ps -a  # List all containers to ensure MongoDB is up
 
     - name: Show MongoDB logs
-      run: docker logs mongo  # Print MongoDB logs for debugging
+      run: |
+        echo "MongoDB logs:"
+        docker logs $(docker ps -q --filter "ancestor=mongo")  # Fetch logs for mongo container
 
     - name: Run tests
       env:
-        MONGO_URI: mongodb://mongo:27017/api-db  # Correct MongoDB URI
+        MONGO_URI: mongodb://mongo:27017/api-db  # Correct URI for MongoDB
       run: npm test
