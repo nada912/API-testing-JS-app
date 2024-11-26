@@ -58,5 +58,5 @@ jobs:
 
     - name: Run tests
       env:
-        MONGO_URI: mongodb://mongo:27017/api-db  # Correct URI for MongoDB
+        MONGO_URI: mongodb://127.0.0.1:27017/api-db  # Correct URI for MongoDB
       run: npm test
